@@ -3,6 +3,7 @@ from authentication import authenticate
 from googleapiclient.discovery import build
 from tabulate import tabulate
 import os
+import pandas as pd
 from dotenv import load_dotenv
 load_dotenv()
 API_KEY = os.getenv('YT_API_KEY')
@@ -26,7 +27,6 @@ class Authenticator:
             return channel_id
         else:
             raise Exception('Failed to retrieve authenticated channel.')
-
 
 class VideoLister:
     def __init__(self, credentials):
@@ -81,14 +81,10 @@ class VideoSelector:
 
 
 class AnalyticsReporter:
-    def __init__(self, credentials):
+    def __init__(self, credentials, channel_id):
         self.credentials = credentials
         self.channel_id = channel_id
 
-
-    def get_analytics_service(self, credentials):
-        youtubeAnalytics = build('youtubeAnalytics', 'v2', credentials=credentials)
-        return youtubeAnalytics
     
 
     def channel_stats(self):
@@ -97,13 +93,13 @@ class AnalyticsReporter:
            part="statistics",
            id=self.channel_id
            ).execute()
-        column_names = [header for header in request['items'][0]['statistics']]
-        data = [[value for value in request['items'][0]['statistics'].values()]]
-        df = tabulate(data,headers = column_names, tablefmt = 'pretty')
-        return request
+        statistics = request['items'][0]['statistics']
+        df = pd.DataFrame.from_dict(statistics, orient='index', columns=['Value'])
+        return df
     
 
-    def execute_channel_report(self, youtubeAnalytics):
+    def execute_channel_report(self, credentials):
+        youtubeAnalytics = build('youtubeAnalytics', 'v2', credentials=credentials)
         result = youtubeAnalytics.reports().query(
             ids='channel==MINE',
             startDate='2022-01-01',
@@ -112,12 +108,14 @@ class AnalyticsReporter:
             dimensions='month',
             sort='month'
         ).execute()
-        column_names = [header['name'] for header in result['columnHeaders']]
-        df = tabulate(result['rows'],headers = column_names, tablefmt = 'pretty')
-        return result
+        headers = [header['name'] for header in result['columnHeaders']]
+        rows = result['rows']
+        df = pd.DataFrame(rows, columns=headers)
+        return df
     
 
-    def execute_video_report(self, selected_video_id, youtubeAnalytics):
+    def execute_video_report(self, selected_video_id, credentials):
+        youtubeAnalytics = build('youtubeAnalytics', 'v2', credentials=credentials)
         result = youtubeAnalytics.reports().query(
             ids='channel==MINE',
             startDate='2022-01-01',
@@ -129,10 +127,10 @@ class AnalyticsReporter:
         ).execute()
         column_names = [header['name'] for header in result['columnHeaders']]
         df = tabulate(result['rows'],headers = column_names, tablefmt = 'pretty')
-        return result
+        return df
     
 
-    def get_video_comments(self, selected_video_id):
+    def get_video_comments(self, selected_video_id, credentials):
         youtube = build('youtube', 'v3', credentials=credentials,developerKey=API_KEY)
         comments = []
         results = youtube.commentThreads().list(
@@ -158,31 +156,13 @@ class AnalyticsReporter:
 
 
 
-if __name__ == '__main__':
-    credentials = authenticate()
+#video_lister = VideoLister(credentials)
+#videos = video_lister.list_videos(channel_id)
 
-    authenticator = Authenticator(credentials)
-    channel_id = authenticator.authenticate_channel()
-    analytics_reporter = AnalyticsReporter(credentials)
-
-    youtube_analytics = AnalyticsReporter(credentials).get_analytics_service(credentials)
-    channel_data = analytics_reporter.channel_stats()
-    print(channel_data)
-
-    channel_report =analytics_reporter.execute_channel_report( youtube_analytics)
-    print(channel_report)
-
-    video_lister = VideoLister(credentials)
-    videos = video_lister.list_videos(channel_id)
-
-    video_selector = VideoSelector()
-    selected_video_id = video_selector.select_video(videos)
-
-    if selected_video_id:
-        video_report =analytics_reporter.execute_video_report(selected_video_id, youtube_analytics)
-        print(video_report)
-        comments = analytics_reporter.get_video_comments(selected_video_id)
-        print(comments)
-
-
+#video_selector = VideoSelector()
+#selected_video_id = video_selector.select_video(videos)
+#if selected_video_id:
+#    video_report =analytics_reporter.execute_video_report(selected_video_id, credentials)
+#    
+#    comments = analytics_reporter.get_video_comments(selected_video_id)
 

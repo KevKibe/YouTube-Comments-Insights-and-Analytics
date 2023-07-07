@@ -1,76 +1,74 @@
 import dash
-import dash_html_components as html
-from dash import dcc
-import plotly.graph_objs as go
-from dash.dependencies import Input, Output
+import dash_bootstrap_components as dbc
+from main import Authenticator, AnalyticsReporter, VideoLister, VideoSelector
 from authentication import authenticate
-from main import AnalyticsReporter
-from main import VideoLister
-from main import VideoSelector
-
-# Authenticate and initialize necessary objects
+from dash import html
+from dash import dcc
+import plotly.express as px
+import os
+from dotenv import load_dotenv
+from dash.dependencies import Input, Output, State
+load_dotenv()
+API_KEY = os.getenv('YT_API_KEY')
 credentials = authenticate()
-analytics_reporter = AnalyticsReporter(credentials)
-video_lister = VideoLister(credentials)
-video_selector = VideoSelector()
 
-app = dash.Dash(__name__)
+authenticator = Authenticator(credentials)
+channel_id = authenticator.authenticate_channel()
+analytics_reporter = AnalyticsReporter(credentials, channel_id)
 
-# Define the layout of the web application
-layout = html.Div(children=[
-    html.H1("YouTube Analytics Dashboard"),
+channel_data = analytics_reporter.channel_stats()
 
-    # Variables channel data
-    html.Div([
-        html.H2("Variables Channel Data"),
-        dcc.Graph(id="variables-channel-graph")
-    ]),
+channel_report =analytics_reporter.execute_channel_report(credentials)
+channel_data = (channel_data.head())
+channel_report = (channel_report.head())
 
-    # Channel report
-    html.Div([
-        html.H2("Channel Report"),
-        dcc.Graph(id="channel-report-graph")
-    ]),
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
-    # Video report
-    html.Div([
-        html.H2("Video Report"),
-        dcc.Graph(id="video-report-graph"),
-        html.Div(id="video-comments")
-    ])
-])
-
-# Register the callbacks
-@app.callback(
-    Output("variables-channel-graph", "figure"),
-    Output("channel-report-graph", "figure"),
-    Output("video-report-graph", "figure"),
-    Output("video-comments", "children"),
-    Input("video-selector", "value")
+# Create the layout
+app.layout = html.Div(
+    children=[
+        dcc.Location(id="url", refresh=False),
+        html.H1("Channel Report"),
+        dcc.Graph(
+            id="channel-report-graph-1",
+            figure=px.line(channel_report, x="month", y="views"),
+        ),
+        dcc.Graph(
+            id="channel-report-graph-2",
+            figure=px.line(channel_report, x="month", y="estimatedMinutesWatched"),
+        ),
+        dcc.Graph(
+            id="channel-report-graph-3",
+            figure=px.line(channel_report, x="month", y="likes"),
+        ),
+        dcc.Graph(
+            id="channel-report-graph-4",
+            figure=px.line(channel_report, x="month", y="subscribersGained"),
+        )
+    ]
 )
-def update_graphs(selected_video_id):
-    analytics_reporter.channel_id = selected_video_id
 
-    # Update Variables Channel Data graph
-    variables_channel_fig = go.Figure()
-    # Add your code to populate the figure with data for variables channel data
 
-    # Update Channel Report graph
-    channel_report_fig = go.Figure()
-    # Add your code to populate the figure with data for the channel report
+@app.callback(Output("channel-report-graph-1", "figure"),
+              Output("channel-report-graph-2", "figure"),
+              Output("channel-report-graph-3", "figure"),
+              Output("channel-report-graph-4", "figure"),
+              Input("url", "pathname"),
+              State("channel-report-graph-1", "figure"),
+              State("channel-report-graph-2", "figure"),
+              State("channel-report-graph-3", "figure"),
+              State("channel-report-graph-4", "figure"))
+def update_graphs(pathname, figure1, figure2, figure3, figure4):
+    if pathname == "/success":
+        # Update the figures based on new data or calculations
+        # Replace the following code with your actual logic for updating the figures
+        figure1 = px.line(channel_report, x="month", y="views")
+        figure2 = px.line(channel_report, x="month", y="estimatedMinutesWatched")
+        figure3 = px.line(channel_report, x="month", y="likes")
+        figure4 = px.line(channel_report, x="month", y="subscribersGained")
 
-    # Update Video Report graph
-    video_report_fig = go.Figure()
-    # Add your code to populate the figure with data for the video report
+    return figure1, figure2, figure3, figure4
 
-    # Get video comments
-    comments = analytics_reporter.get_video_comments(selected_video_id)
-    comments_html = html.Div([
-        html.H3("Video Comments"),
-        html.Ul([html.Li(comment) for comment in comments])
-    ])
-
-    return variables_channel_fig, channel_report_fig, video_report_fig, comments_html
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(port=8080,debug=True)
