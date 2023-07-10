@@ -8,3 +8,4 @@ tabulate
 dash
 dash-bootstrap-components
 plotly
+matplotlib
