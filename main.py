@@ -57,27 +57,9 @@ class VideoLister:
 
 
 class VideoSelector:
-    def select_video(self, videos):
-        # Display and select the list of videos with an index
-        for i, video in enumerate(videos):
-            video_id = video['id'].get('videoId')
-            video_title = video['snippet']['title']
-            if video_id:
-                print(f"{i+1}. Video ID: {video_id} | Title: {video_title}")
-
-        video_index = input("Select the video: ")
-        try:
-            video_index = int(video_index)
-            if 1 <= video_index <= len(videos):
-                selected_video = videos[video_index - 1]
-                selected_video_id = selected_video['id'].get('videoId')
-                print(f"Selected Video ID: {selected_video_id}")
-                return selected_video_id
-
-            else:
-                print("Invalid video number.")
-        except ValueError:
-            print("Invalid input. Please enter a number.")
+   def select_video(self,videos):
+       video_options = [{'label': f"{video['snippet']['title']} ({video['id']['videoId']})", 'value': video['id']['videoId']} for video in videos]
+       return video_options
 
 
 class AnalyticsReporter:
@@ -154,52 +136,26 @@ class AnalyticsReporter:
                 break
         return comments
 
-    def get_channel_video_report(self, channel_id, credentials):
-        youtubeAnalytics = build('youtubeAnalytics', 'v2', credentials=credentials)
-        video_lister = VideoLister(credentials)
-        video_ids = [video['id']['videoId'] for video in video_lister.list_videos(channel_id)]
-        all_videos_report = []
 
-        for video_id in video_ids:
-            result = youtubeAnalytics.reports().query(
-                ids='channel==MINE',
-                startDate='2022-01-01',
-                endDate='2023-01-01',
-                metrics='estimatedMinutesWatched,views,likes,subscribersGained',
-                dimensions='month',
-                filters=f'video=={video_id}',
-                sort='month'
-            ).execute()
-
-            headers = [header['name'] for header in result['columnHeaders']]
-            rows = result.get('rows', [])
-            for row in rows:
-                row_data = [value for value in row]
-                row_data.insert(0, video_id)
-                all_videos_report.append(row_data)
-
-        df = pd.DataFrame(all_videos_report, columns=['video_id'] + headers)
-        return df
     
 
-# credentials = authenticate()
-# authenticator = Authenticator(credentials)
-# channel_id = authenticator.authenticate_channel()
-# video_lister = VideoLister(credentials)
-# videos = video_lister.list_videos(channel_id)
-# analytics_reporter = AnalyticsReporter(credentials, channel_id)
-# # report = analytics_reporter.get_channel_video_report(channel_id, credentials)
-# # print(report)
+credentials = authenticate()
+authenticator = Authenticator(credentials)
+channel_id = authenticator.authenticate_channel()
+video_lister = VideoLister(credentials)
+videos = video_lister.list_videos(channel_id)
+analytics_reporter = AnalyticsReporter(credentials, channel_id)
+channel_report = analytics_reporter.execute_channel_report(credentials)
+print(channel_report)
 
+video_lister = VideoLister(credentials)
+videos = video_lister.list_videos(channel_id)
 
-# video_lister = VideoLister(credentials)
-# videos = video_lister.list_videos(channel_id)
-
-# video_selector = VideoSelector()
-# selected_video_id = video_selector.select_video(videos)
-# if selected_video_id:
-#    video_report =analytics_reporter.execute_video_report(selected_video_id, credentials)
-#    print(video_report)
-#    comments = analytics_reporter.get_video_comments(selected_video_id, credentials)
-#    print(comments)
+video_selector = VideoSelector()
+selected_video_id = video_selector.select_video(videos)
+if selected_video_id:
+   video_report =analytics_reporter.execute_video_report(selected_video_id, credentials)
+   print(video_report)
+   comments = analytics_reporter.get_video_comments(selected_video_id, credentials)
+   print(comments)
 

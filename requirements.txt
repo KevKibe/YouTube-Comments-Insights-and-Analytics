@@ -9,3 +9,4 @@ dash
 dash-bootstrap-components
 plotly
 matplotlib
+timedelta
