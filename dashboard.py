@@ -1,8 +1,9 @@
 import dash
 import datetime
+import pandas as pd
 from datetime import timedelta
 import dash_bootstrap_components as dbc
-from channel_stats import ChannelAnalytics , Authenticator
+from channel_stats import ChannelAnalytics, Authenticator
 from video_stats import VideoAnalytics
 from authentication import authenticate
 from dash import html
@@ -16,7 +17,7 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], meta_tags
 credentials = authenticate()
 authenticator = Authenticator(credentials)
 channel_id = authenticator.authenticate_channel()
-channel_statistics= ChannelAnalytics(credentials, channel_id)
+channel_statistics = ChannelAnalytics(credentials, channel_id)
 column_names = {
     'views': 'Views',
     'estimatedMinutesWatched': 'Estimated Minutes Watched',
@@ -33,8 +34,8 @@ channel_stats = channel_stats.rename(columns=column_names)
 channel_data = channel_statistics.channel_data()
 
 video_analytics = VideoAnalytics(credentials)
-videos = video_analytics.get_channel_videos(channel_id)  
-video_stats = video_analytics.query_video_statistics(video_id)
+videos = video_analytics.get_channel_videos(channel_id)
+
 
 def generate_dropdown_options(videos):
     options = []
@@ -42,19 +43,17 @@ def generate_dropdown_options(videos):
         video_id = video.get('id', {}).get('videoId')
         video_title = video.get('snippet', {}).get('title')
         if video_id and video_title:
-            options.append({'label': f"{video_title} ({video_id})", 'value': video_id})
+            options.append({'label': f"{video_title} ", 'value': video_id})
     return options
-videos = channel_data['videoCount'][0] 
 
 
 heading = dbc.Col(html.H1("Youtube Analytics Dashboard",
                           className='text-center bg-white py-4'),
                   width=12)
 
-
-card1 = dbc.Card( 
+card1 = dbc.Card(
     [
-        dbc.CardBody( 
+        dbc.CardBody(
             [
                 html.H4(str((channel_data.loc['subscriberCount', 'Value'])), className="card-text text-center"),
                 html.P(
@@ -64,11 +63,11 @@ card1 = dbc.Card(
             ]
         ),
     ],
-    
+
     className="card-group"
 )
 
-card2 = dbc.Card( 
+card2 = dbc.Card(
     [
         dbc.CardBody(
             [
@@ -80,7 +79,7 @@ card2 = dbc.Card(
             ]
         ),
     ],
-     className="card-group"
+    className="card-group"
 )
 
 card3 = dbc.Card(
@@ -95,8 +94,8 @@ card3 = dbc.Card(
             ]
         ),
     ],
-   
-     className="card-group"
+
+    className="card-group"
 )
 
 card4 = dbc.Card(
@@ -111,8 +110,8 @@ card4 = dbc.Card(
             ]
         ),
     ],
-    
-     className="card-group"
+
+    className="card-group"
 )
 
 card5 = dbc.Card(
@@ -127,20 +126,35 @@ card5 = dbc.Card(
             ]
         ),
     ],
-     className="card-group"
+    className="card-group"
 )
 
 heading2 = dbc.Col(html.H2("Channel Stats",
                            className='text-center bg-white py-4'),
                    width=14)
 
-
-channel_stats_dropdown = dbc.Col([dcc.Dropdown(
+default_column = channel_stats.columns[1]
+channel_stats_dropdown = dbc.Col([
+    dcc.Dropdown(
         id='column-dropdown',
         options=[{'label': col_name.capitalize(), 'value': col_name} for col_name in channel_stats.columns[1:]],
-        value='views'
+        value=default_column,
     ),
-    dcc.Graph(id='graph')
+    
+])
+
+channel_days_dropdown = dbc.Col([
+    dcc.Dropdown(
+        id='channel-days-dropdown',
+        options=[
+            {'label': '30 days', 'value': 30},
+            {'label': '60 days', 'value': 60},
+            {'label': '90 days', 'value': 90},
+            {'label': 'Lifetime', 'value': 'lifetime'}
+        ],
+        value=30,
+        placeholder="Select days"
+    )
 ])
 
 
@@ -148,17 +162,118 @@ heading3 = dbc.Col(html.H2("Video Stats",
                            className='text-center bg-white py-4'),
                    width=12)
 
-video_dropdown = dbc.Col([dcc.Dropdown(
-    id='video-dropdown',
-    options=generate_dropdown_options(videos),
-    placeholder="Select a video"
-)])
+default_video = videos[0]['id']['videoId'] if videos else None
+video_dropdown = dbc.Col([
+    dcc.Dropdown(
+        id='video-dropdown',
+        options=generate_dropdown_options(videos),
+        value=default_video,
+        placeholder="Select a video"
+    )
+])
 
-y_dropdown = dbc.Col([dcc.Dropdown(
-    id='y-dropdown',
-    options=[{'label': col_name.capitalize(), 'value': col_name} for col_name in video_stats.columns[1:]],
-    placeholder="Select a metric for y-axis"
-)])
+default_y_metric = 'views'
+y_dropdown = dbc.Col([
+    dcc.Dropdown(
+        id='y-dropdown',
+        options=[
+            {'label': 'Views', 'value': 'views'},
+            {'label': 'Estimated Minutes Watched', 'value': 'estimatedMinutesWatched'},
+            {'label': 'Average View Duration', 'value': 'averageViewDuration'},
+            {'label': 'Average View Percentage', 'value': 'averageViewPercentage'},
+            {'label': 'Subscribers Gained', 'value': 'subscribersGained'},
+            {'label': 'Comments', 'value': 'comments'},
+            {'label': 'Likes', 'value': 'likes'},
+            {'label': 'Shares', 'value': 'shares'},
+            {'label': 'Annotation Impressions', 'value': 'annotationImpressions'}
+        ],
+        value=default_y_metric,
+        placeholder="Select a metric for y-axis"
+    )
+])
+
+
+video_days_dropdown = dbc.Col([
+    dcc.Dropdown(
+        id='video-days-dropdown',
+        options=[
+            {'label': '30 days', 'value': 30},
+            {'label': '60 days', 'value': 60},
+            {'label': '90 days', 'value': 90},
+            {'label': 'Lifetime', 'value': 'lifetime'}
+        ],
+        value=30,
+        placeholder="Select days"
+    )
+])
+
+
+card6 = dbc.Card(
+    [
+        dbc.CardBody(
+            [
+                html.H4(id='total-views', className="card-text text-center"),
+                html.P(
+                    "Total Views",
+                    className="card-text text-center",
+                ),
+            ]
+        ),
+    ],
+    className="card-group"
+)
+
+card7 = dbc.Card(
+    [
+        dbc.CardBody(
+            [
+                html.H4(id='total-likes', className="card-text text-center"),
+                html.P(
+                    "Total Likes",
+                    className="card-text text-center",
+                ),
+            ]
+        ),
+    ],
+    className="card-group"
+)
+
+card8 = dbc.Card(
+    [
+        dbc.CardBody(
+            [
+                html.H4(id='total-comments', className="card-text text-center"),
+                html.P(
+                    "Total Comments",
+                    className="card-text text-center",
+                ),
+            ]
+        ),
+    ],
+    className="card-group"
+)
+
+
+chat_heading = dbc.Col(html.H2("What do you want to know about the comments?", className='text-center bg-white py-4'), width=12)
+
+chat_box = dbc.Col(
+    [
+        dbc.Card(
+            [
+                dbc.CardHeader("Chat"),
+                dbc.CardBody(
+                    [
+                        html.Div(id="chat-container", className="chat-container"),
+                        dbc.Input(id="user-input", type="text", placeholder="Type your message..."),
+                        html.Button("Send", id="send-button", className="btn btn-primary mt-2")
+                    ]
+                )
+            ]
+        )
+    ],
+    width=12
+)
+
 
 
 app.layout = dbc.Container([
@@ -176,61 +291,111 @@ app.layout = dbc.Container([
     dbc.Row([dbc.Col(heading2)]),
 
     dbc.Row([
-        channel_stats_dropdown
+        channel_stats_dropdown,
+        channel_days_dropdown
     ]),
+    dbc.Row([dbc.Col(dcc.Graph(id='channel-stats-graph'))]),
 
-    dbc.Row([dbc.Col(heading3)
-             ]),
-    
+    dbc.Row([dbc.Col(heading3)]),
+
     dbc.Row([
         video_dropdown,
-        y_dropdown
+        video_days_dropdown,
+        y_dropdown,
+
     ]),
-    
-    dbc.Row([dbc.Col(dcc.Graph(id='line-plot'))])
+
+    dbc.Row([
+        dbc.Col(card6),
+        dbc.Col(card7),
+        dbc.Col(card8),
+    ]),
+
+    dbc.Row([dbc.Col(dcc.Graph(id='video-stats-graph'))]),
+
+    dbc.Row([chat_heading]),
+
+    dbc.Row([chat_box])
 
 ], fluid=True)
 
 
-
+# FOR THE CHANNEL STATS GRAPH
 @app.callback(
-    dash.dependencies.Output('graph', 'figure'),
-    dash.dependencies.Input('column-dropdown', 'value')
+    Output('channel-stats-graph', 'figure'),
+    [Input('column-dropdown', 'value'),
+     Input('channel-days-dropdown', 'value')]
 )
-def update_graph(column):
+def update_channel_stats_graph(column, days):
+    if days == 'lifetime':
+        last_days = pd.Timestamp.min
+    else:
+        last_days = pd.Timestamp.now() - pd.DateOffset(days=days)
+
+    # Convert 'day' column to datetime
+    channel_stats['day'] = pd.to_datetime(channel_stats['day'])
+
+    filtered_stats = channel_stats[channel_stats['day'] >= last_days]
     fig = {
         "data": [
             {
-                "x": channel_stats['day'],
-                "y": channel_stats[column],
+                "x": filtered_stats['day'],
+                "y": filtered_stats[column],
                 "type": "line",
             },
         ],
         "layout": {
-            "title": f"{column.capitalize()} over time",
+            "title": f"{column.capitalize()} over time (Past {days} Days)",
             "xaxis": {"title": "Date"},
             "yaxis": {"title": f"{column.capitalize()}"},
             "height": 500,
             "margin": {"l": 40, "b": 40, "r": 10},
             "hovermode": "closest",
-            "style" : "18rem"
+            "style": "18rem"
         },
     }
     return fig
 
 
+
+# FOR THE VIDEO STATS GRAPHAND CARDS
 @app.callback(
-    Output('line-plot', 'figure'),
-    Input('video-dropdown', 'value'),
-    Input('y-dropdown', 'value')
+    [Output('video-stats-graph', 'figure'),
+     Output('total-views', 'children'),
+     Output('total-likes', 'children'),
+     Output('total-comments', 'children')],
+    [Input('video-dropdown', 'value'),
+     Input('y-dropdown', 'value'),
+     Input('video-days-dropdown', 'value')]
 )
-def update_video_graph(video_id, y_column):
+def update_video_stats(video_id, y_column, days):
     if video_id is None:
-        video_id = ''  # Set a default value if video_id is None
+        video_id = ''
+
+    if days == 'lifetime':
+        last_days = pd.Timestamp.min
+    else:
+        last_days = pd.Timestamp.now() - pd.DateOffset(days=days)
 
     stats_df = video_analytics.query_video_statistics(video_id)
-    fig = px.line(stats_df, x='day', y=y_column)
-    return fig
+    filtered_stats = stats_df[pd.to_datetime(stats_df['day']) >= last_days]
+
+    total_views = filtered_stats['views'].sum()
+    total_likes = filtered_stats['likes'].sum()
+    total_comments = filtered_stats['comments'].sum()
+
+    fig = px.line(filtered_stats, x='day', y=y_column)
+    fig.update_layout(
+        title=f"{y_column.capitalize()} over time (Past {days} Days)",
+        xaxis={"title": "Date"},
+        yaxis={"title": f"{y_column.capitalize()}"},
+        height=400,
+        margin={"l": 40, "b": 40, "r": 10, "t": 40},
+    )
+
+    return fig, total_views, total_likes, total_comments
+
+
 
 
 if __name__ == '__main__':

@@ -56,10 +56,23 @@ class VideoLister:
         return videos
 
 
-class VideoSelector:
-   def select_video(self,videos):
-       video_options = [{'label': f"{video['snippet']['title']} ({video['id']['videoId']})", 'value': video['id']['videoId']} for video in videos]
-       return video_options
+# class VideoSelector:
+    # def select_video(self, videos):
+    #     for i, video in enumerate(videos):
+    #         video_id = video['id'].get('videoId')
+    #         video_title = video['snippet']['title']
+    #         if video_id:
+    #             f"{i+1}. Video ID: {video_id} | Title: {video_title}"
+
+    #     video_index = ()
+    #     video_index = int(video_index)
+    #        if 1 <= video_index <= len(videos):
+    #             selected_video = videos[video_index - 1]
+    #             selected_video_id = selected_video['id'].get('videoId')
+    #             return selected_video_id
+            
+
+
 
 
 class AnalyticsReporter:
@@ -139,23 +152,4 @@ class AnalyticsReporter:
 
     
 
-credentials = authenticate()
-authenticator = Authenticator(credentials)
-channel_id = authenticator.authenticate_channel()
-video_lister = VideoLister(credentials)
-videos = video_lister.list_videos(channel_id)
-analytics_reporter = AnalyticsReporter(credentials, channel_id)
-channel_report = analytics_reporter.execute_channel_report(credentials)
-print(channel_report)
-
-video_lister = VideoLister(credentials)
-videos = video_lister.list_videos(channel_id)
-
-video_selector = VideoSelector()
-selected_video_id = video_selector.select_video(videos)
-if selected_video_id:
-   video_report =analytics_reporter.execute_video_report(selected_video_id, credentials)
-   print(video_report)
-   comments = analytics_reporter.get_video_comments(selected_video_id, credentials)
-   print(comments)
 

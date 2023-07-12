@@ -2,11 +2,14 @@ import pandas as pd
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from authentication import authenticate
+import datetime
+import openai
 import os 
 from dotenv import load_dotenv
 load_dotenv()
 
 API_KEY = os.getenv('YT_API_KEY')
+
 API_SERVICE_NAME = 'youtubeAnalytics'
 API_VERSION = 'v2'
 CLIENT_SECRETS_FILE = 'client_secret.json'
@@ -47,7 +50,7 @@ class VideoAnalytics:
             request = youtube.search().list(
                 part='snippet',
                 channelId=channel_id,
-                maxResults=50,  # Adjust the number of results per page as needed
+                maxResults=100, 
                 pageToken=next_page_token,
                 type='video'
             )
@@ -64,12 +67,13 @@ class VideoAnalytics:
         return videos    
 
     def query_video_statistics(self,video_id ):
+        end_date = datetime.date.today()
         response = self.youtube_analytics.reports().query(
                 ids=f'channel==MINE',
                 filters=f'video=={video_id}',
-                startDate='2022-01-01',
-                endDate='2022-12-31',
-                metrics='views,estimatedMinutesWatched,averageViewDuration,averageViewPercentage,subscribersGained,comments,likes,shares,annotationImpressions',
+                startDate='1970-01-01',
+                endDate=end_date.strftime('%Y-%m-%d'),
+                metrics='views,estimatedMinutesWatched,averageViewDuration,averageViewPercentage,subscribersGained,comments,likes,shares',
                 dimensions='day'
             ).execute()
         headers = [header['name'] for header in response['columnHeaders']]
@@ -77,9 +81,11 @@ class VideoAnalytics:
         stats_df = pd.DataFrame(rows, columns=headers)
         return stats_df
     
+
     def get_video_comments(self, video_id):
+        openai.api_key = os.getenv('OPENAI_API_KEY')
         youtube = build('youtube', 'v3', credentials=self.credentials)
-        comments = []
+        comments_data = []
         results = youtube.commentThreads().list(
             part="snippet",
             videoId=video_id,
@@ -88,7 +94,20 @@ class VideoAnalytics:
         while results:
             for item in results['items']:
                 comment = item['snippet']['topLevelComment']['snippet']['textDisplay']
-                comments.append(comment)
+                prompt = f"Translate the text if it is not in english and return a sentiment , negative or positive: \"{comment}\""
+                response = openai.ChatCompletion.create(
+                   model="gpt-3.5-turbo",
+                   messages={"role": "user", "content": prompt},
+                   temperature=0
+                )
+                sentiment = response.choices[0].text.strip()
+                if sentiment == 'Positive':
+                   sentiment_label = 'Positive'
+                elif sentiment == 'Negative':
+                     sentiment_label = 'Negative'
+                else:
+                    sentiment_label = 'Neutral'
+                comments_data.append({'Comment': comment, 'Sentiment': sentiment_label})  
 
             if 'nextPageToken' in results:
                 results = youtube.commentThreads().list(
@@ -99,13 +118,15 @@ class VideoAnalytics:
                 ).execute()
             else:
                 break
-        return comments
+        comments_df = pd.DataFrame(comments_data)
+        return comments_df
 
     
 # credentials = authenticate() 
 # video_analytics = VideoAnalytics(credentials)
-# video_id = 'osQMJwa60Ts'
-# video_stats = video_analytics.query_video_statistics(video_id)
+# video_id = 'cDedvKJJ6Xg'
+# # video_stats = video_analytics.query_video_statistics(video_id)
+# # print(video_stats)
 # comments = video_analytics.get_video_comments(video_id)
 # print(comments)
 

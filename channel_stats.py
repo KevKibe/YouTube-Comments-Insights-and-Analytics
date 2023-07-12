@@ -2,6 +2,7 @@ import pandas as pd
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from authentication import authenticate
+import datetime
 import os 
 from dotenv import load_dotenv
 load_dotenv()
@@ -50,10 +51,11 @@ class ChannelAnalytics:
 
 
     def query_channel_statistics(self):
+        end_date = datetime.date.today()
         response = self.youtube_analytics.reports().query(
             ids=f'channel==MINE',
-            startDate='2022-01-01',
-            endDate='2022-12-31',
+            startDate='1970-01-01',
+            endDate=end_date.strftime('%Y-%m-%d'),
             metrics='views,estimatedMinutesWatched,averageViewDuration,averageViewPercentage,subscribersGained,comments,likes,shares',
             dimensions='day'
         ).execute()
