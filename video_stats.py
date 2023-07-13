@@ -3,7 +3,8 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from authentication import authenticate
 import datetime
-import openai
+from googletrans import Translator
+from textblob import TextBlob
 import os 
 from dotenv import load_dotenv
 load_dotenv()
@@ -83,9 +84,8 @@ class VideoAnalytics:
     
 
     def get_video_comments(self, video_id):
-        openai.api_key = os.getenv('OPENAI_API_KEY')
         youtube = build('youtube', 'v3', credentials=self.credentials)
-        comments_data = []
+        comments = []
         results = youtube.commentThreads().list(
             part="snippet",
             videoId=video_id,
@@ -94,20 +94,17 @@ class VideoAnalytics:
         while results:
             for item in results['items']:
                 comment = item['snippet']['topLevelComment']['snippet']['textDisplay']
-                prompt = f"Translate the text if it is not in english and return a sentiment , negative or positive: \"{comment}\""
-                response = openai.ChatCompletion.create(
-                   model="gpt-3.5-turbo",
-                   messages={"role": "user", "content": prompt},
-                   temperature=0
-                )
-                sentiment = response.choices[0].text.strip()
-                if sentiment == 'Positive':
-                   sentiment_label = 'Positive'
-                elif sentiment == 'Negative':
-                     sentiment_label = 'Negative'
+                translator = Translator()
+                translation = translator.translate(comment, dest='en').text
+                blob = TextBlob(translation)
+                sentiment = blob.sentiment.polarity
+                if sentiment > 0:
+                    sentiment_label = 'Positive'
+                elif sentiment < 0:
+                    sentiment_label = 'Negative'
                 else:
                     sentiment_label = 'Neutral'
-                comments_data.append({'Comment': comment, 'Sentiment': sentiment_label})  
+                comments.append((comment, sentiment_label))   
 
             if 'nextPageToken' in results:
                 results = youtube.commentThreads().list(
@@ -118,8 +115,8 @@ class VideoAnalytics:
                 ).execute()
             else:
                 break
-        comments_df = pd.DataFrame(comments_data)
-        return comments_df
+        
+        return comments
 
     
 # credentials = authenticate() 

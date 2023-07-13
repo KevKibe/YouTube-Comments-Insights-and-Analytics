@@ -10,6 +10,7 @@ from dash import html
 from dash import dcc
 import plotly.express as px
 from dash.dependencies import Input, Output, State
+import plotly.graph_objects as go
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], meta_tags=[{'name': 'viewport',
                                                                                    'content': 'width=device-width, initial-scale=1.0'}])
@@ -57,7 +58,7 @@ card1 = dbc.Card(
             [
                 html.H4(str((channel_data.loc['subscriberCount', 'Value'])), className="card-text text-center"),
                 html.P(
-                    "Subscribers",
+                    "Total channel Subscribers",
                     className="card-text text-center",
                 ),
             ]
@@ -73,7 +74,7 @@ card2 = dbc.Card(
             [
                 html.H4(str((channel_data.loc['viewCount', 'Value'])), className="card-text text-center"),
                 html.P(
-                    "Total Views",
+                    "Total Channel Views",
                     className="card-text text-center",
                 ),
             ]
@@ -88,7 +89,7 @@ card3 = dbc.Card(
             [
                 html.H4(str(channel_stats['Likes'].sum()), className="card-text text-center"),
                 html.P(
-                    "Total Likes",
+                    "Total Channel Likes",
                     className="card-text text-center",
                 ),
             ]
@@ -104,7 +105,7 @@ card4 = dbc.Card(
             [
                 html.H4(str(channel_stats['Comments'].sum()), className="card-text text-center"),
                 html.P(
-                    "Total Comments",
+                    "Total Channel Comments",
                     className="card-text text-center",
                 ),
             ]
@@ -120,7 +121,7 @@ card5 = dbc.Card(
             [
                 html.H4(str((channel_data.loc['videoCount', 'Value'])), className="card-text text-center"),
                 html.P(
-                    "Uploaded Videos",
+                    "Total Uploaded Videos",
                     className="card-text text-center",
                 ),
             ]
@@ -280,6 +281,8 @@ app.layout = dbc.Container([
     dcc.Location(id="url", refresh=False),
     dbc.Row([dbc.Col(heading)]),
 
+    dbc.Row([dbc.Col(heading2)]),
+
     dbc.Row([
         dbc.Col(card1),
         dbc.Col(card2),
@@ -287,8 +290,6 @@ app.layout = dbc.Container([
         dbc.Col(card4),
         dbc.Col(card5)
     ]),
-
-    dbc.Row([dbc.Col(heading2)]),
 
     dbc.Row([
         channel_stats_dropdown,
@@ -311,7 +312,8 @@ app.layout = dbc.Container([
         dbc.Col(card8),
     ]),
 
-    dbc.Row([dbc.Col(dcc.Graph(id='video-stats-graph'))]),
+    dbc.Row([dbc.Col(dcc.Graph(id='video-stats-graph')),
+              dbc.Col(dcc.Graph(id='pie-chart'))]),
 
     dbc.Row([chat_heading]),
 
@@ -395,7 +397,28 @@ def update_video_stats(video_id, y_column, days):
 
     return fig, total_views, total_likes, total_comments
 
-
+@app.callback(
+    Output('pie-chart', 'figure'),
+    [Input('video-dropdown', 'value')],
+    [State('video-dropdown', 'options')]
+)
+def update_pie_chart(video_id, video_options):
+    video_title = [video['label'] for video in video_options if video['value'] == video_id]
+    comments = video_analytics.get_video_comments(video_id)
+    
+    # Count the number of comments for each sentiment
+    sentiment_counts = {'Positive': 0, 'Negative': 0, 'Neutral': 0}
+    for _, sentiment in comments:
+        sentiment_counts[sentiment] += 1
+    
+    # Create the pie chart
+    labels = list(sentiment_counts.keys())
+    values = list(sentiment_counts.values())
+    data = go.Pie(labels=labels, values=values)
+    layout = go.Layout(title=f'Sentiment Analysis of Video Comments: {video_title[0]}')
+    fig = go.Figure(data=[data], layout=layout)
+    
+    return fig
 
 
 if __name__ == '__main__':

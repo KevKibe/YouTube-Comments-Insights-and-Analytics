@@ -11,3 +11,7 @@ plotly
 matplotlib
 timedelta
 openai
+googletrans==3.1.0a0
+langchain
+faiss-cpu
+tiktoken
