@@ -28,30 +28,27 @@ class ConversationChain:
         self.embeddings = OpenAIEmbeddings()
         self.vectorstore = FAISS.from_texts(texts=self.text_chunks, embedding=self.embeddings)
         self.conversation_chain = ConversationalRetrievalChain.from_llm(
-         llm=ChatOpenAI(
-             api_key= os.getenv('OPENAI_API_KEY'),
-             model_name = "gpt-3.5-turbo",
-             temperature = 0
-                        ),
-    retriever=self.vectorstore.as_retriever()
-)
+            llm=ChatOpenAI(
+                api_key=os.getenv('OPENAI_API_KEY'),
+                model_name="gpt-3.5-turbo",
+                temperature=0
+            ),
+            retriever=self.vectorstore.as_retriever()
+        )
 
         self.chat_history = []
 
     def run(self):
-
-        print('Start your chat-based interaction with your articles')
-        print('---------------------------------------------------------------------------------')
         while True:
             query = input(f"Prompt: ")
             if query == "exit" or query == "quit" or query == "q" or query == "f":
-                print('\033[32m' + 'Exiting')
                 sys.exit()
             if query == '':
                 continue
             result = self.conversation_chain({"question": query, "chat_history": self.chat_history})
             print(f"Answer: " + result["answer"])
             self.chat_history.append((query, result["answer"]))
+
 
 video_id = 'cDedvKJJ6Xg'
 conversation_chain = ConversationChain(video_id)

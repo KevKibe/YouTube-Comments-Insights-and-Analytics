@@ -6,6 +6,7 @@ import dash_bootstrap_components as dbc
 from channel_stats import ChannelAnalytics, Authenticator
 from video_stats import VideoAnalytics
 from authentication import authenticate
+from convo_chain import ConversationChain
 from dash import html
 from dash import dcc
 import plotly.express as px
@@ -257,7 +258,7 @@ card8 = dbc.Card(
 
 chat_heading = dbc.Col(html.H2("What do you want to know about the comments?", className='text-center bg-white py-4'), width=12)
 
-chat_box = dbc.Col(
+chat_box =  dbc.Col(
     [
         dbc.Card(
             [
@@ -419,6 +420,24 @@ def update_pie_chart(video_id, video_options):
     fig = go.Figure(data=[data], layout=layout)
     
     return fig
+
+
+def update_chat_container(user_input, video_id):
+    conversation_chain = ConversationChain(video_id)
+    if user_input == "exit" or user_input == "quit" or user_input == "q" or user_input == "f":
+        return ""
+    else:
+        result = conversation_chain({"question": user_input, "chat_history": conversation_chain.chat_history, "video_id": video_id})
+        conversation_chain.chat_history.append((user_input, result["answer"]))
+        return f"Answer: {result['answer']}\n\nChat History:\n{conversation_chain.chat_history}"
+
+@app.callback(
+    Output("chat-container", "children"),
+    [Input("user-input", "value"), Input("video-dropdown", "value")],
+)
+def update_chat_container(user_input, video_id):
+    return update_chat_container(user_input, video_id)
+
 
 
 if __name__ == '__main__':

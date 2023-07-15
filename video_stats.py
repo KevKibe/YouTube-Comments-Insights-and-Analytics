@@ -66,6 +66,7 @@ class VideoAnalytics:
                 break
 
         return videos    
+        
 
     def query_video_statistics(self,video_id ):
         end_date = datetime.date.today()
