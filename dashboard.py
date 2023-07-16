@@ -435,41 +435,23 @@ def summarize_comments(n_clicks, video_id):
         response = conversation_chain.get_response("summarize the comments in detail")
         return html.P(response)
 
-# @app.callback(
-#     Output("summary-output", "children"),
-#     Output("chat-container", "children"),``
-#     [Input("summarize-button", "n_clicks"),
-#      Input("send-button", "n_clicks")],
-#     [State("user-input", "value"),
-#      State("video-dropdown", "value"),
-#      State("chat-container", "children")]
-# )
-# def update_output(summarize_clicks, send_clicks, user_input, video_id, chat_container_children):
-#     conversation_chain = ConversationChain(video_id)
-#     updated_chat_container = chat_container_children
 
-#     if summarize_clicks is not None:
-#         response = conversation_chain.get_response("summarize the comments in detail")
-#         return html.P(response), updated_chat_container
+@app.callback(
+    Output("chat-container", "children"),
+    [Input("send-button", "n_clicks")],
+    [State("user-input", "value"), State("video-dropdown", "value")]
+)
+def generate_chat_response(n_clicks, user_input, video_id):
+    if n_clicks is not None and user_input and video_id:
+        conversation_chain = ConversationChain(video_id)
+        response = conversation_chain.get_response(user_input)
 
-#     if send_clicks is not None and user_input:
-#         conversation_chain.chat_history.append((conversation_chain.chat_history[-1][0], user_input))
-#         response = conversation_chain.get_response(user_input)
-#         conversation_chain.chat_history.append((user_input, response))
+        chat_bubble_user = dbc.Alert(user_input, color="primary", className="chat-bubble user")
+        chat_bubble_bot = dbc.Alert(response, color="light", className="chat-bubble bot")
 
-#         chat_message = html.Div([
-#             html.P(user_input, className="user-message"),
-#             html.P(response, className="chatbot-message")
-#         ])
+        return [chat_bubble_user, chat_bubble_bot]
+    return []
 
-#         if updated_chat_container is not None:
-#             updated_chat_container.append(chat_message)
-#         else:
-#             updated_chat_container = [chat_message]
-
-#         return None, updated_chat_container
-
-#     return None, updated_chat_container
 
 
 
