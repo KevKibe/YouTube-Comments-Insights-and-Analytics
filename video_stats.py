@@ -6,10 +6,9 @@ import datetime
 from googletrans import Translator
 from textblob import TextBlob
 import os 
-from dotenv import load_dotenv
-load_dotenv()
+from config import YT_API_KEY
 
-API_KEY = os.getenv('YT_API_KEY')
+API_KEY = YT_API_KEY
 
 API_SERVICE_NAME = 'youtubeAnalytics'
 API_VERSION = 'v2'

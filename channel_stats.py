@@ -4,10 +4,9 @@ from googleapiclient.discovery import build
 from authentication import authenticate
 import datetime
 import os 
-from dotenv import load_dotenv
-load_dotenv()
+from config import YT_API_KEY
 
-API_KEY = os.getenv('YT_API_KEY')
+API_KEY = YT_API_KEY
 API_SERVICE_NAME = 'youtubeAnalytics'
 API_VERSION = 'v2'
 CLIENT_SECRETS_FILE = 'client_secret.json'

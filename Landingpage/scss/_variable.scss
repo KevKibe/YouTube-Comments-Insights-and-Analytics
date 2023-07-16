@@ -1,0 +1,240 @@
+/*******************/
+// Theme Fonts
+/********************/
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap');
+$font-family-sans-serif:'Manrope', sans-serif;
+
+// scss-docs-start gray-color-variables
+$white:    #fff !default;
+$gray-100: #F1F1F5 !default;   
+$gray-200: #efefef !default; 
+$gray-300: #8C8C8C !default;
+$gray-400: #7A8496 !default;  //
+$gray-500: #edecf9 !default; 
+$gray-600: #8A8A8A !default; 
+$gray-700: #f2f2f8 !default;
+$gray-800: #7A8496 !default;   
+$gray-900: #14141C !default; 
+$black:    #000 !default;
+$footer-link: #68657C !default;
+$scrollspy: #7593e8 !default;
+
+// scss-docs-start theme-color-variables
+$primary:       #1642B9 !default; 
+$secondary:     #061434 !default; 
+$info:    #2776fc !default; 
+$light:    #F9F9FB !default; 
+$warning:    #EE7B11 !default;
+$success:    #37A05B !default;
+// scss-docs-end theme-color-variables
+
+// scss-docs-start theme-colors-map
+$theme-colors: (
+  "primary":    $primary,
+  "secondary":  $secondary,
+  "info": $info,
+  "light":    $light,
+  "warning":    $warning,
+) !default;
+
+
+// scss-docs-start color-variables
+$blue:    #001C68 !default; 
+$blue-200:  #95A5CE !default; //
+$blue-300:  #92ACF2 !default;//
+$indigo:  #5243C2 !default; 
+$purple:  #611F69 !default;
+$pink:    #d63384 !default;
+$red:     #DD3131 !default; 
+$orange:  #fd7e14 !default;
+$orange-light:  #feefea !default;
+$yellow:  #fec572 !default; //
+$yellow-300:#FFF4CE !default;//
+$green:   #6B9F36 !default;  
+$teal:    #feefea !default;
+$cyan:    #FDF0EA !default;
+
+// scss-docs-end color-variables
+
+
+// scss-docs-start container-max-widths
+$container-max-widths: (
+  sm: 540px,
+  md: 720px,
+  lg: 960px,
+  xl: 1320px,
+) !default;
+// scss-docs-end container-max-widths
+
+
+
+
+/*******************/
+// Theme Text Contrast
+/********************/
+$min-contrast-ratio: 1.6 !default;
+//$enable-shadows: true !default;
+
+/*******************/
+// Theme body bg & text color
+/********************/
+$body-bg: #fff !default;
+$body-color: $gray-900 !default;
+$font-size-base: 1.125rem !default;
+
+// heading fonts setting
+$h1-font-size: 55px !default; //
+$h2-font-size: 52px !default;
+$h3-font-size: 35px !default;
+$h4-font-size: 28px !default;
+$h5-font-size: 18px !default;
+$h6-font-size: 17px !default;
+
+// Font size
+$font-sizes: (
+  1: 75px, //
+  2: 65px, //
+  3: 55px, //
+  4: 25px,
+  5: 22px,
+  6: 20px,
+  7: 18px, //
+  8: 15px,
+  9: 14px,
+  10: 13px,
+  11: 10px,
+);
+
+
+
+/*custom*/
+$opacity-2:0.2;
+$section-gap:150px;
+$top-gutter:50px;
+$border-radius-30:30px;
+/*******************/
+// Theme common variable
+/********************/
+
+
+
+// scss-docs-start border-radius-variables
+$border-radius:    5px !default;
+$border-radius-sm: 10px !default;
+$border-radius-lg: 15px !default;
+$border-radius-xl: 20px !default;
+$border-radius-xxl:25px !default;
+// scss-docs-end border-radius-variables
+
+
+$font-weight-lighter:         lighter !default;
+$font-weight-light:           300 !default;
+$font-weight-normal:          400 !default;
+$font-weight-medium:          500 !default;
+$font-weight-semibold:        600 !default;
+$font-weight-bold:            700 !default;
+$font-weight-bolder:          900 !default;
+
+$font-weight-base:            $font-weight-normal !default;
+
+
+
+// scss-docs-start box-shadow-variables
+$box-shadow:                  15px 60px 190px rgba(86, 91, 106, 0.06) !default; //
+$box-shadow-sm:               0 10px 18px rgba($gray-600, 0.1) !default;
+$box-shadow-lg:               0 1rem 3rem rgba($black, .175) !default;
+$box-shadow-inset:            inset 0 1px 2px rgba($black, .075) !default;
+// scss-docs-end box-shadow-variables
+
+
+/*******************/
+// Theme btn
+/********************/
+$btn-focus-width: 0px;
+$btn-box-shadow: 0 !default;
+$btn-focus-box-shadow: 0;
+
+$line-height-base:            1;
+$line-height-sm:              1.25;
+$line-height-lg:              2;
+
+// Buttons
+//
+// For each of Bootstrap's buttons, define text, background, and border color.
+
+// scss-docs-start btn-variables
+$btn-padding-y:               18px !default;
+$btn-padding-x:               35px !default;
+$btn-outline-padding-y:       15px !default;
+$btn-outline-padding-x:       20px !default;
+$btn-font-family:             $font-family-sans-serif !default;
+$btn-font-size:               17px !default;
+
+
+$btn-border-width:            0 !default;
+$btn-font-weight:             $font-weight-semibold !default;
+$btn-link-color:              $primary !default;
+$btn-link-hover-color:        $blue !default;
+
+$btn-close-color:            $purple!default;
+$btn-close-bg:               url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='#{$btn-close-color}'><path d='M.293.293a1 1 0 0 1 1.414 0L8 6.586 14.293.293a1 1 0 1 1 1.414 1.414L9.414 8l6.293 6.293a1 1 0 0 1-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 0 1-1.414-1.414L6.586 8 .293 1.707a1 1 0 0 1 0-1.414z'/></svg>") !default;
+$btn-close-opacity:          1 !default;
+// Allows for customizing button radius independently from global border radius
+$btn-border-radius:           $border-radius-lg !default;
+
+
+// scss-docs-end btn-variables
+
+//offcanvas
+$zindex-offcanvas: 9999 !default;
+$offcanvas-horizontal-width:350px !default;
+
+
+
+
+// Tables
+//
+// Customizes the `.table` component with basic values, each used across all table variations.
+
+// scss-docs-start table-variables
+$table-cell-padding-y:        1.125rem !default;
+$table-cell-padding-x:        1.125rem !default;
+
+$table-cell-vertical-align:   top !default;
+
+$table-color:                 $gray-900 !default;
+$table-bg:                    $white !default;
+$table-accent-bg:             transparent !default;
+
+$table-th-font-weight:        $font-weight-medium !default;
+
+$table-striped-color:         $gray-900 !default;
+$table-striped-bg-factor:     .56 !default;
+$table-striped-bg:            rgba(237, 243, 249, $table-striped-bg-factor) !default;
+
+$table-border-factor:         .1 !default;
+$table-border-width:          0 !default;
+$table-border-color:          transparent !default;
+
+// scss-docs-end table-variables
+
+//card variables
+$card-spacer-y:                     55px;
+$card-spacer-x:                     60px;
+$card-border-radius:                $border-radius-xxl;
+$card-border-color:                 #2753c9;
+
+//toggle switch       
+$form-check-input-checked-bg-color:     #FFD44D;
+
+//accordion
+$accordion-bg:                      $gray-100;
+$accordion-button-bg:               $gray-100;
+$accordion-button-active-bg:        $gray-100;
+$accordion-border-width:            0;
+$accordion-padding-y:               25px;
+$accordion-padding-x:               30px;
+$accordion-border-radius:           $border-radius-sm;
+$accordion-button-icon:             url("../../assets/images/faq/plus.svg");
+$accordion-button-active-icon:      url("../../assets/images/faq/minus.svg");
+$accordion-icon-width:               20px;

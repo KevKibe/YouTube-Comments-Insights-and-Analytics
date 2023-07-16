@@ -1,0 +1,91 @@
+.main-header{
+    padding-top:45px;
+    transition: all 0.5s ease;
+    z-index: 99;
+    .logo-img {
+        max-width: 30px;
+        height: 30px;
+      }
+      
+    .search{
+        max-width:140px;
+        .btn{
+            line-height: $line-height-base;
+            i{
+                font-size: 20px;
+            }
+        }
+        
+        .form-control{
+            &::placeholder{
+                color:$blue-200;
+                font-size:17px;
+                font-weight: $font-weight-medium;
+                text-transform: capitalize;
+            }
+            color:$white;
+            
+        }
+    }
+    .navbar-collapse{
+        .navbar-nav{
+            padding-left: 60px;
+            .nav-item .nav-link{
+                font-size:17px;
+                padding:0px 50px 0 0;
+                color: $secondary;
+                font-weight:$font-weight-medium;
+                &:hover{
+                    color: $primary;
+                }
+            }
+        }
+       
+    }  
+    &.sticky{
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 99;
+        width: 100%;
+        padding: 12px 0;
+        background: $white;
+        box-shadow: 0px 10px 30px rgb(0 71 55 / 10%);
+
+        .search{
+            .form-control{
+                &::placeholder{
+                    color:$black;
+                    font-size:17px;
+                    font-weight: $font-weight-medium;
+                    text-transform: capitalize;
+                }
+                color:$black;
+            }
+            i{
+                color:$black !important;
+            }
+        }
+    }
+    .nav-toggler{
+        i{
+            font-size: 35px;
+        }
+    }
+    .offcanvas{
+        .offcanvas-header{
+            .btn-close{
+                margin-top: -25px;
+                margin-right: 0px;
+                i{font-size: 35px;color:$secondary;}
+            } 
+        }
+        .navbar-nav{
+            .nav-link{
+                color: $secondary;
+                font-weight:$font-weight-medium;
+                font-size: 20px;
+            }
+        }
+    }
+}

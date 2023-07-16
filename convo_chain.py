@@ -7,6 +7,7 @@ from langchain.vectorstores import FAISS
 from langchain.chains import ConversationalRetrievalChain
 from langchain.chat_models import ChatOpenAI
 from video_stats import VideoAnalytics
+from config import OPENAI_API_KEY
 
 class ConversationChain:
     def __init__(self, video_id):
@@ -29,7 +30,7 @@ class ConversationChain:
         self.vectorstore = FAISS.from_texts(texts=self.text_chunks, embedding=self.embeddings)
         self.conversation_chain = ConversationalRetrievalChain.from_llm(
             llm=ChatOpenAI(
-                api_key=os.getenv('OPENAI_API_KEY'),
+                api_key=OPENAI_API_KEY,
                 model_name="gpt-3.5-turbo",
                 temperature=0
             ),
