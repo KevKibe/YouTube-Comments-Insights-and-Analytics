@@ -38,7 +38,6 @@ channel_data = channel_statistics.channel_data()
 video_analytics = VideoAnalytics(credentials)
 videos = video_analytics.get_channel_videos(channel_id)
 
-
 def generate_dropdown_options(videos):
     options = []
     for video in videos:
@@ -154,7 +153,7 @@ channel_days_dropdown = dbc.Col([
             {'label': '90 days', 'value': 90},
             {'label': 'Lifetime', 'value': 'lifetime'}
         ],
-        value=30,
+        value='lifetime',
         placeholder="Select days"
     )
 ])
@@ -204,7 +203,7 @@ video_days_dropdown = dbc.Col([
             {'label': '90 days', 'value': 90},
             {'label': 'Lifetime', 'value': 'lifetime'}
         ],
-        value=30,
+        value='lifetime',
         placeholder="Select days"
     )
 ])
@@ -255,25 +254,23 @@ card8 = dbc.Card(
     className="card-group"
 )
 
-
-chat_heading = dbc.Col(html.H2("What do you want to know about the comments?", className='text-center bg-white py-4'), width=12)
-
-chat_box =  dbc.Col(
+card9 = dbc.Card(
     [
-        dbc.Card(
+        dbc.CardBody(
             [
-                dbc.CardHeader("Chat"),
-                dbc.CardBody(
-                    [
-                        html.Div(id="chat-container", className="chat-container"),
-                        dbc.Input(id="user-input", type="text", placeholder="Type your message..."),
-                        html.Button("Send", id="send-button", className="btn btn-primary mt-2")
-                    ]
-                )
+                dbc.Row([
+                    dbc.Col(html.Button("Summarize Video Comments", id="summarize-button", className="btn btn-primary mt-2"))
+                ]),
+                dbc.Row([dbc.Col(html.Div(id="summary-output", className="mt-4"))])
             ]
-        )
+        ),
+        dbc.CardBody([
+            html.Div(id="chat-container", className="chat-container"),
+            dbc.Input(id="user-input", type="text", placeholder="Type your message..."),
+            html.Button("Send", id="send-button", className="btn btn-primary mt-2")
+        ])
     ],
-    width=12
+    className="mt-4"
 )
 
 
@@ -313,14 +310,17 @@ app.layout = dbc.Container([
         dbc.Col(card8),
     ]),
 
-    dbc.Row([dbc.Col(dcc.Graph(id='video-stats-graph')),
-              dbc.Col(dcc.Graph(id='pie-chart'))]),
+    dbc.Row([
+        dbc.Col(dcc.Graph(id='video-stats-graph')),
+              dbc.Col(dcc.Graph(id='pie-chart')),
+              ]),
 
-    dbc.Row([chat_heading]),
-
-    dbc.Row([chat_box])
-
-], fluid=True)
+    dbc.Row([
+        dbc.Col(card9)
+    ]),
+    
+    ],
+ fluid=True)
 
 
 # FOR THE CHANNEL STATS GRAPH
@@ -422,23 +422,66 @@ def update_pie_chart(video_id, video_options):
     return fig
 
 
-def update_chat_container(user_input, video_id):
-    conversation_chain = ConversationChain(video_id)
-    if user_input == "exit" or user_input == "quit" or user_input == "q" or user_input == "f":
-        return ""
-    else:
-        result = conversation_chain({"question": user_input, "chat_history": conversation_chain.chat_history, "video_id": video_id})
-        conversation_chain.chat_history.append((user_input, result["answer"]))
-        return f"Answer: {result['answer']}\n\nChat History:\n{conversation_chain.chat_history}"
 
+    
 @app.callback(
-    Output("chat-container", "children"),
-    [Input("user-input", "value"), Input("video-dropdown", "value")],
+    Output("summary-output", "children"),
+    [Input("summarize-button", "n_clicks")],
+    [State("video-dropdown", "value")]
 )
-def update_chat_container(user_input, video_id):
-    return update_chat_container(user_input, video_id)
+def summarize_comments(n_clicks, video_id):
+    if n_clicks is not None and video_id is not None:
+        conversation_chain = ConversationChain(video_id)
+        response = conversation_chain.get_response("summarize the comments in detail")
+        return html.P(response)
+
+# @app.callback(
+#     Output("summary-output", "children"),
+#     Output("chat-container", "children"),``
+#     [Input("summarize-button", "n_clicks"),
+#      Input("send-button", "n_clicks")],
+#     [State("user-input", "value"),
+#      State("video-dropdown", "value"),
+#      State("chat-container", "children")]
+# )
+# def update_output(summarize_clicks, send_clicks, user_input, video_id, chat_container_children):
+#     conversation_chain = ConversationChain(video_id)
+#     updated_chat_container = chat_container_children
+
+#     if summarize_clicks is not None:
+#         response = conversation_chain.get_response("summarize the comments in detail")
+#         return html.P(response), updated_chat_container
+
+#     if send_clicks is not None and user_input:
+#         conversation_chain.chat_history.append((conversation_chain.chat_history[-1][0], user_input))
+#         response = conversation_chain.get_response(user_input)
+#         conversation_chain.chat_history.append((user_input, response))
+
+#         chat_message = html.Div([
+#             html.P(user_input, className="user-message"),
+#             html.P(response, className="chatbot-message")
+#         ])
+
+#         if updated_chat_container is not None:
+#             updated_chat_container.append(chat_message)
+#         else:
+#             updated_chat_container = [chat_message]
+
+#         return None, updated_chat_container
+
+#     return None, updated_chat_container
 
 
+
+# @app.callback(
+#     Output("chat-container", "children"),
+#     [Input("clear-chat-button", "n_clicks")],
+#     [State("chat-container", "children")]
+# )
+# def clear_chat(n_clicks, chat_container_children):
+#     if n_clicks is not None:
+#         return None
+#     return chat_container_children
 
 if __name__ == '__main__':
     app.run_server(port=8080, debug=True)

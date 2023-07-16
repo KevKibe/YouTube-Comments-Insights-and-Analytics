@@ -38,18 +38,6 @@ class ConversationChain:
 
         self.chat_history = []
 
-    def run(self):
-        while True:
-            query = input(f"Prompt: ")
-            if query == "exit" or query == "quit" or query == "q" or query == "f":
-                sys.exit()
-            if query == '':
-                continue
-            result = self.conversation_chain({"question": query, "chat_history": self.chat_history})
-            print(f"Answer: " + result["answer"])
-            self.chat_history.append((query, result["answer"]))
-
-
-video_id = 'cDedvKJJ6Xg'
-conversation_chain = ConversationChain(video_id)
-conversation_chain.run()
+    def get_response(self, query):
+        result = self.conversation_chain({"question": query, "chat_history": self.chat_history})
+        return result["answer"]

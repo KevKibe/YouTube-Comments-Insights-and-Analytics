@@ -105,7 +105,7 @@ class VideoAnalytics:
                     sentiment_label = 'Negative'
                 else:
                     sentiment_label = 'Neutral'
-                comments.append((comment, sentiment_label))   
+                comments.append((translation, sentiment_label))   
 
             if 'nextPageToken' in results:
                 results = youtube.commentThreads().list(
@@ -123,8 +123,8 @@ class VideoAnalytics:
 # credentials = authenticate() 
 # video_analytics = VideoAnalytics(credentials)
 # video_id = 'cDedvKJJ6Xg'
-# # video_stats = video_analytics.query_video_statistics(video_id)
-# # print(video_stats)
+# # # video_stats = video_analytics.query_video_statistics(video_id)
+# # # print(video_stats)
 # comments = video_analytics.get_video_comments(video_id)
 # print(comments)
 
