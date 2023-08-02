@@ -46,9 +46,9 @@ def run_authentication_flow():
         'client_secret.json',
         scopes=SCOPES
     )
-
-    flow.run_local_server(port=8080, prompt='consent', authorization_prompt_message='')
-
+    authorization_prompt_message = 'Please refresh the page'
+    flow.run_local_server(port=8080, prompt='consent', authorization_prompt_message=authorization_prompt_message)
+    print('Please refresh the page')
     return flow.credentials
 
 def save_credentials(credentials):
