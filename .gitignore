@@ -2,7 +2,7 @@ __pycache__
 .venv
 .env
 config.py  
-client_secret.json
+
 YT Analytics
 instagramdash.py
 venv
