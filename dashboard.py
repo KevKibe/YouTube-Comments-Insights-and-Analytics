@@ -12,6 +12,7 @@ from dash import dcc
 import plotly.express as px
 from dash.dependencies import Input, Output, State
 import plotly.graph_objects as go
+import streamlit as st
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], meta_tags=[{'name': 'viewport',
                                                                                    'content': 'width=device-width, initial-scale=1.0'}])
@@ -452,18 +453,6 @@ def generate_chat_response(n_clicks, user_input, video_id):
         return [chat_bubble_user, chat_bubble_bot]
     return []
 
-
-
-
-# @app.callback(
-#     Output("chat-container", "children"),
-#     [Input("clear-chat-button", "n_clicks")],
-#     [State("chat-container", "children")]
-# )
-# def clear_chat(n_clicks, chat_container_children):
-#     if n_clicks is not None:
-#         return None
-#     return chat_container_children
 
 if __name__ == '__main__':
     app.run_server(port=8080, debug=True)
