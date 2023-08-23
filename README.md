@@ -1,7 +1,7 @@
-# Content-Insight-Analytics
-This is an application that can easily summarize your comments from specific uploaded YouTube videos and leverage natural language queries for efficient searches. Moreover, harness the power of the YouTube Analytics API v2 to extract insightful analytics data for both your individual uploaded videos and the entire channel.<br>
-Basically an improved version of Youtube Studio with a natural language querying feature over comments.
-
+# Description
+- This is an application that can easily summarize your comments from specific uploaded YouTube videos and leverage natural language queries for efficient searches. Moreover, harness the power of the YouTube Analytics API v2 to extract insightful analytics data for both your individual uploaded videos and the entire channel.<br>
+- Basically an improved version of **Youtube Studio** with a natural language querying feature over comments.
+- **Note: You need to have a Youtube Channel with Videos uploaded.**
 ## Features
 - **Comment Summarization:** Quickly generate summaries for comments associated with any YouTube video.
 - **Natural Language Queries:** Use natural language queries to explore and search through comments seamlessly.
