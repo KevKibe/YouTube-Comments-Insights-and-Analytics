@@ -15,3 +15,5 @@ googletrans==3.1.0a0
 langchain
 faiss-cpu
 tiktoken
+python-dotenv
+textblob
