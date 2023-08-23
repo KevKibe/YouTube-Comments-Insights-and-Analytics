@@ -17,3 +17,4 @@ faiss-cpu
 tiktoken
 python-dotenv
 textblob
+streamlit
